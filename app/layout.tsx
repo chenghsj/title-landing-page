@@ -1,63 +1,66 @@
-import "@/styles/globals.css";
-import { Metadata } from "next";
-import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
-import { Providers } from "./providers";
-import { Navbar } from "@/components/navbar";
-import { Link } from "@nextui-org/link";
-import clsx from "clsx";
+import { ReactElement } from 'react';
+import { Metadata, Viewport } from 'next';
+import { Footer } from '@/components/footer';
+import { Navbar } from '@/components/navbar';
+import { fontMono, fontMulish, fontRaleway, fontSans } from '@/config/fonts';
+import { siteConfig } from '@/config/site';
+import { validateRequest } from '@/lib/auth';
+import { Providers } from '@/providers/root-providers';
+import '@/styles/globals.scss';
 
-export const metadata: Metadata = {
-	title: {
-		default: siteConfig.name,
-		template: `%s - ${siteConfig.name}`,
-	},
-	description: siteConfig.description,
-	themeColor: [
-		{ media: "(prefers-color-scheme: light)", color: "white" },
-		{ media: "(prefers-color-scheme: dark)", color: "black" },
-	],
-	icons: {
-		icon: "/favicon.ico",
-		shortcut: "/favicon-16x16.png",
-		apple: "/apple-touch-icon.png",
-	},
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
+  ],
 };
 
-export default function RootLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<head />
-			<body
-				className={clsx(
-					"min-h-screen bg-background font-sans antialiased",
-					fontSans.variable
-				)}
-			>
-				<Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-					<div className="relative flex flex-col h-screen">
-						<Navbar />
-						<main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-							{children}
-						</main>
-						<footer className="w-full flex items-center justify-center py-3">
-							<Link
-								isExternal
-								className="flex items-center gap-1 text-current"
-								href="https://nextui-docs-v2.vercel.app?utm_source=next-app-template"
-								title="nextui.org homepage"
-							>
-								<span className="text-default-600">Powered by</span>
-								<p className="text-primary">NextUI</p>
-							</Link>
-						</footer>
-					</div>
-				</Providers>
-			</body>
-		</html>
-	);
+export const metadata: Metadata = {
+  title: {
+    default: siteConfig.name,
+    template: `%s - ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
+  appleWebApp: true,
+  manifest: '/manifest.json',
+};
+
+type RootLayoutType = {
+  children: ReactElement;
+};
+
+export default async function RootLayout({ children }: RootLayoutType) {
+  const session = await validateRequest();
+  return (
+    <html
+      lang='en'
+      className={`${fontRaleway.variable} ${fontMulish.variable} ${fontMono.variable} ${fontSans.variable}`}
+      suppressHydrationWarning
+    >
+      <head />
+      <body className='background flex min-h-screen overflow-x-clip bg-background antialiased'>
+        <Providers
+          session={session}
+          themeProps={{ attribute: 'class', defaultTheme: 'light' }}
+        >
+          <div className='bg-nav_top flex min-h-screen flex-col justify-between bg-gray_l6 bg-[url(../public/bg/bg_1x.webp)] bg-auto dark:bg-gray_b md:pt-[34px] xl:bg-cover'>
+            <Navbar />
+            <main className='flex w-full flex-1 flex-col'>{children}</main>
+            <Footer />
+          </div>
+        </Providers>
+      </body>
+    </html>
+  );
 }

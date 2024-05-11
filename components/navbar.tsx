@@ -1,144 +1,196 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/legacy/image';
+import NextLink from 'next/link';
 import {
-	Navbar as NextUINavbar,
-	NavbarContent,
-	NavbarMenu,
-	NavbarMenuToggle,
-	NavbarBrand,
-	NavbarItem,
-	NavbarMenuItem,
-} from "@nextui-org/navbar";
-import { Button } from "@nextui-org/button";
-import { Kbd } from "@nextui-org/kbd";
-import { Link } from "@nextui-org/link";
-import { Input } from "@nextui-org/input";
-
-import { link as linkStyles } from "@nextui-org/theme";
-
-import { siteConfig } from "@/config/site";
-import NextLink from "next/link";
-import clsx from "clsx";
-
-import { ThemeSwitch } from "@/components/theme-switch";
-import {
-	TwitterIcon,
-	GithubIcon,
-	DiscordIcon,
-	HeartFilledIcon,
-	SearchIcon,
-} from "@/components/icons";
-
-import { Logo } from "@/components/icons";
+  Avatar,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Link,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenuToggle,
+  Navbar as NextUINavbar,
+} from '@nextui-org/react';
+import { logout } from '@/actions/logout';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { siteConfig } from '@/config/site';
+import { useSession } from '@/providers/session-provider';
+import cn from '@/utils/cn';
+import { CustomButton } from './custom-button';
 
 export const Navbar = () => {
-	const searchInput = (
-		<Input
-			aria-label="Search"
-			classNames={{
-				inputWrapper: "bg-default-100",
-				input: "text-sm",
-			}}
-			endContent={
-				<Kbd className="hidden lg:inline-block" keys={["command"]}>
-					K
-				</Kbd>
-			}
-			labelPlacement="outside"
-			placeholder="Search..."
-			startContent={
-				<SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-			}
-			type="search"
-		/>
-	);
+  const { user, session } = useSession();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-	return (
-		<NextUINavbar maxWidth="xl" position="sticky">
-			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-				<NavbarBrand as="li" className="gap-3 max-w-fit">
-					<NextLink className="flex justify-start items-center gap-1" href="/">
-						<Logo />
-						<p className="font-bold text-inherit">ACME</p>
-					</NextLink>
-				</NavbarBrand>
-				<ul className="hidden lg:flex gap-4 justify-start ml-2">
-					{siteConfig.navItems.map((item) => (
-						<NavbarItem key={item.href}>
-							<NextLink
-								className={clsx(
-									linkStyles({ color: "foreground" }),
-									"data-[active=true]:text-primary data-[active=true]:font-medium"
-								)}
-								color="foreground"
-								href={item.href}
-							>
-								{item.label}
-							</NextLink>
-						</NavbarItem>
-					))}
-				</ul>
-			</NavbarContent>
+  return (
+    <NextUINavbar
+      maxWidth='xl'
+      classNames={{
+        base: 'w-screen bg-transparent',
+        wrapper: 'h-16 md:h-20 sm:px-10 lg:px-28 md:max-w-none',
+      }}
+      onMenuOpenChange={setIsMenuOpen}
+    >
+      <NavbarContent className='basis-1/5 sm:basis-full' justify='start'>
+        <NavbarMenuToggle className='lg:hidden' />
+        <NavbarBrand as='li' className='h-full'>
+          <NextLink
+            className='flex h-full w-24 items-center justify-start gap-1 md:w-36'
+            href='/'
+          >
+            <div className='relative h-full w-full'>
+              <Image
+                className='dark:invert'
+                src='/logo/logo_1x.webp'
+                layout='fill'
+                objectFit='contain'
+                alt='navbar logo'
+              />
+            </div>
+          </NextLink>
+        </NavbarBrand>
+      </NavbarContent>
 
-			<NavbarContent
-				className="hidden sm:flex basis-1/5 sm:basis-full"
-				justify="end"
-			>
-				<NavbarItem className="hidden sm:flex gap-2">
-					<Link isExternal href={siteConfig.links.twitter} aria-label="Twitter">
-						<TwitterIcon className="text-default-500" />
-					</Link>
-					<Link isExternal href={siteConfig.links.discord} aria-label="Discord">
-						<DiscordIcon className="text-default-500" />
-					</Link>
-					<Link isExternal href={siteConfig.links.github} aria-label="Github">
-						<GithubIcon className="text-default-500" />
-					</Link>
-					<ThemeSwitch />
-				</NavbarItem>
-				<NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-				<NavbarItem className="hidden md:flex">
-					<Button
-            isExternal
-						as={Link}
-						className="text-sm font-normal text-default-600 bg-default-100"
-						href={siteConfig.links.sponsor}
-						startContent={<HeartFilledIcon className="text-danger" />}
-						variant="flat"
-					>
-						Sponsor
-					</Button>
-				</NavbarItem>
-			</NavbarContent>
+      <NavbarContent>
+        <ul
+          className={cn(
+            'mx-auto hidden gap-8 rounded-2xl bg-white bg-opacity-60 p-5 px-14 lg:flex',
+            'dark:bg-gray_b dark:bg-opacity-100'
+          )}
+        >
+          {siteConfig.navItems.map((item) => (
+            <NavbarItem key={item.href}>
+              <NextLink
+                className='font-bold active:text-gray_l2'
+                href={item.href}
+              >
+                {item.label}
+              </NextLink>
+            </NavbarItem>
+          ))}
+        </ul>
+      </NavbarContent>
 
-			<NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-				<Link isExternal href={siteConfig.links.github} aria-label="Github">
-					<GithubIcon className="text-default-500" />
-				</Link>
-				<ThemeSwitch />
-				<NavbarMenuToggle />
-			</NavbarContent>
+      <NavbarContent
+        className='hidden basis-1/5 sm:flex sm:basis-full'
+        justify='end'
+      >
+        <ThemeSwitch />
+        {session ? (
+          <Dropdown placement='bottom-end' radius='sm'>
+            <DropdownTrigger>
+              <Avatar
+                isBordered
+                className='cursor-pointer'
+                src={user?.avatarURL || ''}
+                name={user?.name || ''}
+              />
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownItem
+                className='text-black dark:text-white'
+                href={`/user/${user.id}`}
+                as={Link}
+              >
+                Profile
+              </DropdownItem>
+              <DropdownItem
+                className='text-danger'
+                color='danger'
+                onPress={() => logout()}
+              >
+                Sign out
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        ) : (
+          <>
+            <NavbarItem className='hidden md:flex'>
+              <Button
+                className='bg-transparent font-raleway text-primary dark:text-white'
+                as={Link}
+              >
+                Sign In
+              </Button>
+            </NavbarItem>
+            <NavbarItem className='hidden sm:flex'>
+              <CustomButton variant='primary' as={Link} href='/login'>
+                Sign Up
+              </CustomButton>
+            </NavbarItem>
+          </>
+        )}
+      </NavbarContent>
 
-			<NavbarMenu>
-				{searchInput}
-				<div className="mx-4 mt-2 flex flex-col gap-2">
-					{siteConfig.navMenuItems.map((item, index) => (
-						<NavbarMenuItem key={`${item}-${index}`}>
-							<Link
-								color={
-									index === 2
-										? "primary"
-										: index === siteConfig.navMenuItems.length - 1
-										? "danger"
-										: "foreground"
-								}
-								href="#"
-								size="lg"
-							>
-								{item.label}
-							</Link>
-						</NavbarMenuItem>
-					))}
-				</div>
-			</NavbarMenu>
-		</NextUINavbar>
-	);
+      <NavbarContent className='basis-1 pl-4 sm:hidden' justify='end'>
+        <ThemeSwitch />
+        {session ? (
+          <Dropdown placement='bottom-end' radius='sm'>
+            <DropdownTrigger>
+              <Avatar
+                size='sm'
+                isBordered
+                className='cursor-pointer'
+                src={user?.avatarURL || ''}
+                name={user?.name || ''}
+              />
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownItem
+                className='text-black dark:text-white'
+                href={`/user/${user.id}`}
+                as={Link}
+                showDivider
+              >
+                Profile
+              </DropdownItem>
+              <DropdownItem>
+                <form action={() => logout()}>Sign out</form>
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        ) : (
+          <NavbarItem className='flex'>
+            <CustomButton variant='primary' as={Link} href='/login'>
+              Sign Up
+            </CustomButton>
+          </NavbarItem>
+        )}
+      </NavbarContent>
+
+      <div
+        className={cn(
+          'absolute left-0 top-[3.5rem] w-screen list-none bg-white opacity-95 transition-height md:top-[5rem]',
+          `${isMenuOpen ? `h-[100dvh]` : 'h-0'}`
+        )}
+      />
+      <div
+        className={cn(
+          'absolute top-[4rem] mx-4 mt-2 flex w-screen flex-col gap-2 md:top-[5.5rem]',
+          `${isMenuOpen ? `visible` : 'invisible'}`
+        )}
+      >
+        {siteConfig.navItems.map((item, index) => (
+          <Link
+            key={`${item}-${index}`}
+            color={
+              index === siteConfig.navMenuItems.length - 1
+                ? 'danger'
+                : 'primary'
+            }
+            href={item.href}
+            size='lg'
+          >
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </NextUINavbar>
+  );
 };
