@@ -1,13 +1,17 @@
+'use server';
+
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { generateCodeVerifier, generateState } from 'arctic';
 import { googleProvider } from '@/lib/auth';
 
-export async function GET(): Promise<Response> {
+export async function googleOAuthAction(): Promise<void> {
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
   const url = await googleProvider.createAuthorizationURL(state, codeVerifier, {
     scopes: ['profile', 'email'],
   });
+  // url.searchParams.set('prompt', 'consent');
 
   cookies().set('github_oauth_state', state, {
     path: '/',
@@ -25,5 +29,5 @@ export async function GET(): Promise<Response> {
     sameSite: 'lax',
   });
 
-  return Response.redirect(url);
+  redirect(url.toString());
 }

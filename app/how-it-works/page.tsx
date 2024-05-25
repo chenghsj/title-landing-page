@@ -5,7 +5,7 @@ import { title } from '@/components/primitives';
 import { cn } from '@/utils/cn';
 import { section_padding } from '@/utils/styles';
 
-export default function AboutPage() {
+export default function HowItWorksPage() {
   return (
     <ContainerWithoutNav>
       <section
@@ -16,7 +16,7 @@ export default function AboutPage() {
           section_padding
         )}
       >
-        About
+        How it works
       </section>
     </ContainerWithoutNav>
   );

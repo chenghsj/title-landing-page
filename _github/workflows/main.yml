@@ -1,0 +1,56 @@
+# // not being used, rename _github to .github to use
+# name: Check the source code
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+#   workflow_dispatch:
+
+# jobs:
+#   run-lint:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Install Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - uses: pnpm/action-setup@v4
+#         name: Install pnpm
+#         with:
+#           version: 8
+#           run_install: false
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - uses: actions/cache@v4
+#         name: Setup pnpm cache
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install
+
+#       - name: Prettier
+#         run: pnpm run format:fix
+
+#       - name: Lint
+#         run: pnpm run lint:fix
+
+#       - uses: stefanzweifel/git-auto-commit-action@v5
+#         with:
+#           commit_message: Auto format

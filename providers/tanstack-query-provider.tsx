@@ -9,12 +9,10 @@ function TanstackQueryProvider({ children }: any) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <ReactQueryStreamedHydration>{children}</ReactQueryStreamedHydration>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryStreamedHydration>{children}</ReactQueryStreamedHydration>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

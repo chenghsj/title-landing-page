@@ -1,9 +1,9 @@
 import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { PrismaAdapter } from '@lucia-auth/adapter-prisma';
-import { PrismaClient } from '@prisma/client';
 import { Google } from 'arctic';
 import { Lucia, Session, User } from 'lucia';
+import prisma from './prisma';
 
 declare module 'lucia' {
   interface Register {
@@ -24,8 +24,6 @@ export const googleProvider = new Google(
   process.env.GOOGLE_CLIENT_SECRET!,
   process.env.GOOGLE_REDIRECT_URI!
 );
-
-export const prisma = new PrismaClient();
 
 const adapter = new PrismaAdapter(prisma.session, prisma.user);
 

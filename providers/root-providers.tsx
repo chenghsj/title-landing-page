@@ -5,6 +5,7 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { ThemeProviderProps } from 'next-themes/dist/types';
 import { NextUIProvider } from '@nextui-org/system';
 import { validateRequest } from '@/lib/auth';
+import { ModalDisclosureProvider } from './modal-disclosure-provider';
 import { SessionProvider } from './session-provider';
 import { TanstackQueryProvider } from './tanstack-query-provider';
 
@@ -19,7 +20,9 @@ export function Providers({ children, themeProps, session }: ProvidersProps) {
     <TanstackQueryProvider>
       <SessionProvider session={session}>
         <NextUIProvider>
-          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+          <ModalDisclosureProvider>
+            <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+          </ModalDisclosureProvider>
         </NextUIProvider>
       </SessionProvider>
     </TanstackQueryProvider>

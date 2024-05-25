@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import { OAuth2RequestError } from 'arctic';
 import { generateIdFromEntropySize } from 'lucia';
-import { googleProvider, lucia, prisma } from '@/lib/auth';
+import { googleProvider, lucia } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
 interface GoogleUser {
   id: string;
@@ -35,7 +36,7 @@ export async function GET(request: Request): Promise<Response> {
       codeVerifier
     );
     const googleUserResponse = await fetch(
-      'https://openidconnect.googleapis.com/v1/userinfo?prompt=consent',
+      'https://openidconnect.googleapis.com/v1/userinfo',
       {
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`,

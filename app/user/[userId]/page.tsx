@@ -1,44 +1,39 @@
 'use client';
 
-import React from 'react';
+import React, { ChangeEvent, useTransition } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { redirect } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { File } from 'buffer';
+import { serialize } from 'object-to-formdata';
 import * as z from 'zod';
+import { Button, Card, CardBody, Radio, RadioGroup } from '@nextui-org/react';
+import { uploadAction } from '@/actions/upload';
 import {
-  Button,
-  Card,
-  CardBody,
-  Input,
-  Radio,
-  RadioGroup,
-} from '@nextui-org/react';
-import { CustomButton } from '@/components/custom-button';
+  ContainerWithoutNav,
+  ExtendedButton,
+} from '@/components/_styled-components';
+import { ErrorMessage } from '@/components/form/error-message';
+import { StyledInput } from '@/components/form/input-field';
 import { Upload } from '@/components/icons';
 import { useSession } from '@/providers/session-provider';
+import { cn } from '@/utils/cn';
+import { uploadFormSchema } from '@/utils/validation-schema/upload-form-schema';
 
 type Props = {};
 
-type FormInput = {
-  uploadType: 'url' | 'file';
-  file: File;
-  url: string;
+type FormInput = Omit<z.infer<typeof uploadFormSchema>, 'file'> & {
+  file?: File;
 };
-
-export const LoginFormSchema = z.object({
-  file: z.custom<File>(),
-});
 
 export default function ProfilePage({}: Props) {
   const { session } = useSession();
-
   if (!session) {
-    redirect('/login');
+    redirect('/signin');
   }
 
+  const [isPending, startTransition] = useTransition();
   const {
-    register,
+    setValue,
     watch,
     control,
     handleSubmit,
@@ -46,45 +41,65 @@ export default function ProfilePage({}: Props) {
   } = useForm<FormInput>({
     mode: 'onChange',
     defaultValues: {
-      file: '',
-      url: '',
       uploadType: 'url',
     },
-    resolver: zodResolver(LoginFormSchema),
+    resolver: zodResolver(uploadFormSchema),
   });
   const uploadType = watch('uploadType');
+  const file = watch('file');
 
-  const onSubmit: SubmitHandler<FormInput> = (data) =>
-    alert(JSON.stringify(data, null, 2));
+  console.log(errors);
+  const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    setValue('file', e.target.files[0]);
+  };
+
+  const onSubmit: SubmitHandler<FormInput> = async (data) => {
+    console.log(data);
+    const formData = serialize(data);
+    startTransition(() => {
+      uploadAction(formData);
+    });
+  };
+
+  const hasErrorMessage =
+    (uploadType === 'url' && errors.url?.message) ||
+    (uploadType === 'file' && !file && errors.file?.message);
 
   return (
-    <div className='flex h-screen w-full -translate-y-[34px] flex-col items-center justify-center gap-8 md:h-[calc(100vh-114px)]'>
-      <div className='font-raleway text-4xl font-bold lg:text-6xl text-center flex flex-col gap-7'>
+    <ContainerWithoutNav>
+      <div className='flex flex-col gap-7 text-center font-raleway text-4xl font-bold lg:text-6xl'>
         Welcome!
-        <div className='font-medium text-2xl'>
+        <div className='text-2xl font-medium'>
           {`Let's start building your page`}
         </div>
       </div>
-      <div className='box-border flex w-[80%] max-w-6xl justify-center gap-4 rounded-[10px] bg-[#ffffff6e] px-8 py-10 font-sans shadow-none  dark:border-[#2f2f2f6c] dark:bg-[#000000a1] md:py-20'>
+      <div className='box-border flex w-[80%] max-w-6xl justify-center gap-4 rounded-10 bg-[#ffffff6e] px-8 py-10 font-sans shadow-none  dark:border-[#2f2f2f6c] dark:bg-[#000000a1] md:py-20'>
         <Card
-          classNames={{ base: 'bg-transparent w-full max-w-2xl rounded-none' }}
+          classNames={{ base: 'w-full max-w-2xl rounded-none bg-transparent' }}
           shadow='none'
         >
-          <CardBody className='p-0'>
-            <form onSubmit={handleSubmit(onSubmit)}>
+          <CardBody className='flex flex-col items-center p-0'>
+            <form
+              className='flex w-full flex-col items-center'
+              onSubmit={handleSubmit(onSubmit)}
+            >
               <Controller
                 control={control}
                 name='uploadType'
                 render={({ field: { onChange, value } }) => (
                   <RadioGroup
-                    onChange={onChange}
                     classNames={{
+                      base: 'w-full',
                       wrapper: 'flex flex-row',
-                      label:
-                        'text-gray_b dark:text-white font-bold sm:text-lg ml-2',
+                      label: cn(
+                        'ml-2 font-bold text-gray_b dark:text-white sm:text-lg',
+                        hasErrorMessage && 'text-danger'
+                      ),
                     }}
                     label='You Video Resume'
-                    value={uploadType}
+                    onChange={onChange}
+                    value={value}
                   >
                     <Radio value='url'>URL</Radio>
                     <Radio value='file'>File</Radio>
@@ -92,56 +107,59 @@ export default function ProfilePage({}: Props) {
                 )}
               />
               {uploadType === 'url' ? (
-                <Input
-                  id='video-file'
-                  aria-label='video link input'
-                  classNames={{
-                    base: 'mt-3',
-                    inputWrapper:
-                      'bg-white md:h-14 rounded-lg border-border_b border md:px-6',
-                    input: 'outline-none md:text-lg font-sans',
-                  }}
-                  variant='bordered'
-                  placeholder='youtube url'
-                  {...register('url', {
-                    required: true,
-                  })}
-                  errorMessage={errors.url?.message}
+                <Controller
+                  name='url'
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <StyledInput
+                      className='mt-3'
+                      value={value}
+                      onChange={onChange}
+                      placeholder='youtube url'
+                      errorMessage={errors.url?.message}
+                      isInvalid={!!errors.url}
+                    />
+                  )}
                 />
               ) : (
-                <Button
-                  className='w-full bg-white md:h-14 rounded-lg border-border_b border md:px-8 data-[pressed=true]:transform-none mt-3 md:text-lg font-sans dark:text-black'
-                  endContent={<Upload className='w-6' />}
-                >
-                  Upload
-                  <Input
-                    id='video-file'
-                    aria-label='video upload button'
-                    classNames={{
-                      base: 'absolute w-ful mt-7 h-full left-0 opacity-0 bottom-0',
-                      inputWrapper: 'h-full',
-                      input: 'cursor-pointer',
-                    }}
-                    type='file'
-                    accept='video/mp4'
-                    {...register('file', {
-                      required: true,
-                    })}
-                  />
-                </Button>
+                <>
+                  <Button
+                    className='mt-3 w-97 rounded-lg border border-border_b bg-white data-[pressed=true]:transform-none dark:text-black sm:h-14 md:px-8 md:text-lg lg:w-98'
+                    endContent={<Upload className='w-6' />}
+                  >
+                    <div className='overflow-hidden text-ellipsis whitespace-nowrap'>
+                      {file ? file.name : 'Upload'}
+                    </div>
+                    <Controller
+                      name='file'
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type='file'
+                          // accept='video/mp4'
+                          className='absolute bottom-0 left-0 h-full w-full cursor-pointer opacity-0'
+                          onChange={handleUpload}
+                        />
+                      )}
+                    />
+                  </Button>
+                  {uploadType === 'file' && !file && errors.file?.message && (
+                    <ErrorMessage>{errors.file?.message}</ErrorMessage>
+                  )}
+                </>
               )}
-              <CustomButton
-                className='mt-5 rounded-lg font-raleway sm:font-bold md:!h-14 text-base'
+              <ExtendedButton
+                variant='primary'
+                className='mt-5 w-97 lg:w-98'
                 fullWidth
                 type='submit'
-                variant='primary'
               >
                 Get started
-              </CustomButton>
+              </ExtendedButton>
             </form>
           </CardBody>
         </Card>
       </div>
-    </div>
+    </ContainerWithoutNav>
   );
 }

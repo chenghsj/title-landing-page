@@ -4,7 +4,8 @@ import Image from 'next/legacy/image';
 import Link from 'next/link';
 import { Button, Card, CardBody, CardHeader } from '@nextui-org/react';
 import { ScreenIcon, StarIcon } from '@/components/icons';
-import cn from '@/utils/cn';
+import { cn } from '@/utils/cn';
+import { section_padding } from '@/utils/styles';
 
 const jobsWall = [
   {
@@ -52,15 +53,11 @@ const newsWall = [
   },
 ];
 
-const section_padding = 'px-5 sm:px-14 xl:px-28 py-20';
-
-const section_height = 'h-[calc(100vh-(3.5)rem)]';
-
 export default function Home() {
   return (
     <>
       <section
-        className={cn('w-full', 'flex flex-col items-center', section_padding)}
+        className={cn('flex w-full flex-col items-center', section_padding)}
       >
         <div
           className={cn(
@@ -80,11 +77,11 @@ export default function Home() {
           <div className='mt-8 flex h-16 w-full items-center md:mt-[72px]'>
             <Button
               className={cn(
-                'mx-auto min-h-[46px] min-w-[269px] rounded-[10px] bg-gray_b px-8 py-4 font-mulish text-white',
-                'font-bold dark:bg-white dark:text-gray_b data-[pressed=true]:transform-none'
+                'mx-auto min-h-[46px] min-w-[269px] rounded-10 bg-gray_b px-8 py-4 font-mulish text-white',
+                'font-bold data-[pressed=true]:transform-none dark:bg-white dark:text-gray_b'
               )}
               as={Link}
-              href='/login'
+              href='/signup'
             >
               Sign Up For Free
             </Button>
@@ -111,7 +108,7 @@ export default function Home() {
               <Card
                 key={singleJob.id}
                 classNames={{
-                  base: 'rounded-lg font-sans flex gap-4 px-5 py-6 shadow-none box-border bg-[#ffffff6e] dark:bg-[#6666666d] border border-[#ffffffb2] dark:border-[#2f2f2f6c]',
+                  base: 'box-border flex gap-4 rounded-lg border border-[#ffffffb2] bg-[#ffffff6e] px-5 py-6 font-sans shadow-none dark:border-[#2f2f2f6c] dark:bg-[#6666666d]',
                 }}
               >
                 <CardHeader className='p-0'>
@@ -138,7 +135,7 @@ export default function Home() {
               <Card
                 key={singleNew.id}
                 classNames={{
-                  base: 'rounded-lg font-sans flex gap-4 px-5 py-6 shadow-none box-border bg-[#ffffff6e] dark:bg-[#6666666d] border border-white dark:border-[#2f2f2f6c]',
+                  base: 'box-border flex gap-4 rounded-lg border border-white bg-[#ffffff6e] px-5 py-6 font-sans shadow-none dark:border-[#2f2f2f6c] dark:bg-[#6666666d]',
                 }}
               >
                 <CardBody className='p-0 text-sm text-gray_l5'>
